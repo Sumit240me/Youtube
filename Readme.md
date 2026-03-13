@@ -18,3 +18,40 @@
 # database ko hamesa try catch mai warp kro kyuki problems aa akti hai
 
 # important line "database hamesa dusare continent mai hai" tho async await kai use karo
+
+# step 3  working in app.js on express 
+
+# step 4 jab bhi hum middleware ka use karte hai tho hum "app.use" karte hai
+
+# npm i cookie-parser cors 
+# cors means cross origin resourse sharing it accepts the request from only give frontend url
+
+# middlewares are used in between function for checking the auhentication of the users (err,req,res,next)
+
+# step 5 kisi bhi function ko hum async and try catch ka wrapper provide karba rahe hai utils mai uska asyncHandler ka code hai
+
+# step 6 Handling the error and respone so it also look much structural formate 5:32 se hai thoda difficult hai
+
+# step 7 we are starting with the modelling of the data in the models folders
+
+# THE MOST IMPORTANT USE OF MONGODB IS AGGREGATING DATA "mongoose-aggregate-paginate-v2"  study with Aggregate-pipeline
+
+# npm i bycrpt it helps in hashing the password
+
+# npm i jasonwebtoken helps in creating the tokens the Secret helps in protecting our password
+
+# used bcrypt inside user
+# now using jwt definning the secret
+
+# step 8 we are learing here the file upload most of time we uses third party app
+
+# Here we are suing cloudinary services for uploading our file
+# multer is also used on express study about it github multer
+
+# multer ke through hi file upload hoti hai cloudinary "sdk" tho ek service hai jaise aws ek service hai
+
+# hum kay kar rahe hai multer ke through apni file ko server se le kar local storage me daal dege aur phir local storage se usko cloudinary par upload kar dege  direct bhi kar sakte hai lekin 2 step process is the best
+
+# code for cloudinary is written inside the utils ==>> utils is bascially used for writting the mehtods or function that are used at multiple places with different input type
+
+# Now we are writting the middleware using multer inside middleware
