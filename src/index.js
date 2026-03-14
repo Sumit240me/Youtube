@@ -8,7 +8,7 @@ import { app } from "./app.js";
 // the other approach write function in db folder and import it here and execute
 
 dotenv.config({
-    path: './env'
+    path: './.env'
 })
 
 // since connectDB is the async function always return the promise on execution
@@ -23,7 +23,7 @@ connectDB()
     console.log("Mongo db connection failed !!!", error);
 })
 
-
+// npm run dev
 // since this import dotenv syntax is not avaliable anywhere so we are using it as a experimental feature  we have made changes inside package.json
 // inscript tag
 

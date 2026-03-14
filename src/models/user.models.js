@@ -50,8 +50,8 @@ const userSchema = new Schema(
 
 userSchema.pre("save", async function(next){
     if(!this.isModified("password")) return next();
-    this.password = bcrypt.hash(this.password, 10) // 10 - kitne rounds ko encrypt karna hai
-    next()
+    this.password = await bcrypt.hash(this.password, 10) // 10 - kitne rounds ko encrypt karna hai
+    next
 })
 
 // checking wheater the user has gien the correct password as stored in the database or not
@@ -90,6 +90,10 @@ userSchema.methods.generateRefreshToken = function(){
 }
 
 export const User = mongoose.model('User', userSchema)
+
+// ye jo user hai bo database se direct contact kar sakta hai kyu -- kyuki ye mongoose se bana hai isliye isko export bhi kiya hai
+// export karke isse rigister user karte samee check karege ki user already exist or not
+
 
 // kisi bhi feild par seaching enable karni hoti hai tho hum index true kar dete hai
 

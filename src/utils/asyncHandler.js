@@ -1,5 +1,7 @@
+// ye ek higher order function hai jo ki function ko input lekar usko promise mai wrap karke return mai function ko de deta hai
+
 const asyncHandler = (requestHandler) => {
-    (req,res,next) => {
+    return (req,res,next) => {
         Promise.resolve(requestHandler(req,res,next))
         .catch((err) => next(err))
     }

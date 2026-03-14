@@ -19,4 +19,17 @@ app.use(express.static("public"))
 // koi bhi images aii, pdf aii tho usko apne server par store kar ke rakh sakte hai
 app.use(cookieParser())  // user ke cookie ko read kar apyee
 
+
+
+
+// routes import
+import userRouter from './routes/user.routes.js'   //ye maan caha naam tabhi de sakte hai jab export default ho rah ho
+
+// http:localhost:8000/api/v1/users/registerUser
+// routes declaration => kyuki ab hum routes ko alag likh rahe hai tho hume ab middleware lana padhega
+app.use("/api/v1/users", userRouter)
+
+
+
+
 export { app }

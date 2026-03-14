@@ -55,3 +55,23 @@
 # code for cloudinary is written inside the utils ==>> utils is bascially used for writting the mehtods or function that are used at multiple places with different input type
 
 # Now we are writting the middleware using multer inside middleware
+
+# step  Now we are moving towards writting the controllers which is very important for logic building  The First step we are going to write the register logic
+
+# the next step is creating the route in routes folder
+
+# importing both the userRoutes ans userController in app.js
+
+# Now we are moving towards the logic of writing the registerUser code 
+
+# Now study the following console.log(cloudinary response , req.body, req.files, )
+
+# PART 2
+
+# Jab tak appke pass Acces token hai tho app koi bhi authentication service ko access kar sakte ho jaise data upload karna (ye short term ke liye hota hai)
+
+# Refresh token (Long lived hota hai) jab apka access token expire ho jaee tho hum refresh token ko match karthe hai jo ki harame database mai aur user ke pass hota hai agar same hota hai tho user ko dusra access token provide kar diya jata hai.
+
+# we starting with writting the login code for user
+
+# in logedinUser we are learning how to send cookies
