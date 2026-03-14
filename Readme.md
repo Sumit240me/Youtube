@@ -75,3 +75,5 @@
 # we starting with writting the login code for user
 
 # in logedinUser we are learning how to send cookies
+
+# now we are moving towards the new functionality which is subcription

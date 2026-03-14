@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { loginUser, logoutUser, registerUser } from "../controllers/user.controller.js";
+import { loginUser, logoutUser, registerUser,refreshAccessToken } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js"
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -21,10 +21,14 @@ router.route("/register").post(
     registerUser
 )
 
-router.route("/login").post( loginUser )
+router.route("/login").post(loginUser)
 
 // secure routes  ==>> Adding the middleware to check wheater the user is logedin or not
 // multiple middleware can be added one after the another 
 router.route("/logout").post(verifyJWT ,logoutUser)
+
+router.route("/refersh-token").post(refreshAccessToken)
+
+
 
 export default router

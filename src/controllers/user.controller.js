@@ -5,24 +5,27 @@ import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.models.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js"
+import jwt from "jsonwebtoken"
 
 // since the method to generate accessToken and Refresh token is so common that we are putting it in the seprate method
 const generateAccessAndRefreshTokens = async(userId) => {
     try{
         const user = await User.findById(userId);
+        //console.log(user);
         const accessToken = user.generateAccessToken()
         const refreshToken = user.generateRefreshToken()
       
         // ab ye token generate tho ho gaye hai lekin ye sirf is method ke andar hi hai tho refresh ko tho update karna padega
         // or access ko user ko return karna padega
-
+        //console.log(refreshToken);
         user.refreshToken = refreshToken;
-        await user.save({ validateBeforeSave: false }) // ye validation magta hai save karne par tho humne usko false kar diya
         
+        await user.save({ validateBeforeSave: false }) // ye validation magta hai save karne par tho humne usko false kar diya
+
         return { accessToken, refreshToken }
            
     } catch(error){
-        throw new ApiError(500, "Something went wrong while generating the refresh and access token")
+        throw new ApiError(500, error)
     }
 }
 
@@ -117,7 +120,7 @@ const  loginUser = asyncHandler(async(req, res) => {
 
     const {email, username, password} = req.body
 
-    if(!username || !email){
+    if(!(username || email)){
         throw new ApiError(400, "username or email is required")
     }
     // The or operator find for anyOne of them either username or email if get then returns the value
@@ -129,10 +132,10 @@ const  loginUser = asyncHandler(async(req, res) => {
     // User ye mogodb ke mongoose ka User hai jo ki sirf ushike function jaise findone,get etc ke liye use hota hai
     // user -->> ye apke difined kiye gaye functions keyi liye use hota hai jaise "ispasswordCorrect"
     if(!user){
-        throw new ApiError(404, "User does not access")
+        throw new ApiError(404, "User does not exist")
     } 
  
-    const isPasswordValid = await user.ispasswordCOrrect(password);
+    const isPasswordValid = await user.isPasswordCorrect(password);
     
     if(!isPasswordValid){
         throw new ApiError(401, "Invalid user credential")
@@ -201,8 +204,57 @@ await User.findByIdAndUpdate(
     .json(new ApiResponse(200, {}, "User logged Out"))
 })
 
+
+// in this method what we are doing actually creating both new access and refresh token with the help of refresh token
+const refreshAccessToken = asyncHandler(async (req, res) => {
+    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
+
+    if(!incomingRefreshToken){
+        throw new ApiError(401, "unauthorized request")
+    }
+    
+    try {
+        const decodedToken = jwt.verify(
+            incomingRefreshToken,
+            process.env.REFRESH_TOKEN_SECRET
+        )
+    
+        const user = await User.findById(decodedToken?._id)
+        
+        if(!user){
+            throw new ApiError(401, "Invalid refresh token")
+        }
+    
+        if(incomingRefreshToken !== user?.refreshToken){
+            throw new ApiError(401, "Refersh token is expired or used")
+        }
+        
+        const options = {
+            httpOnly: true,
+            secure: true
+        }
+    
+        const {accessToken, newrefreshToken} = await generateAccessAndRefreshTokens(user._id)
+    
+        return res.
+        status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", newrefreshToken, options)
+        .json(
+            new ApiResponse(
+                200,
+                {accessToken, refreshToken: newrefreshToken},
+                "Access token refershed"
+            )
+        )
+    } catch (error) {
+        throw new ApiError(401, error?.message || "Invalid refersh token")
+    }
+})
+
 export { 
     registerUser,
     loginUser,
-    logoutUser
+    logoutUser,
+    refreshAccessToken
  }

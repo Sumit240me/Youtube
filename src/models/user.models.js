@@ -48,12 +48,13 @@ const userSchema = new Schema(
 
     },{timestamps:true})
 
-userSchema.pre("save", async function(next){
-    if(!this.isModified("password")) return next();
-    this.password = await bcrypt.hash(this.password, 10) // 10 - kitne rounds ko encrypt karna hai
-    next
-})
+userSchema.pre("save", async function () {
 
+    if(!this.isModified("password")) return;
+
+    this.password = await bcrypt.hash(this.password, 10);
+
+})
 // checking wheater the user has gien the correct password as stored in the database or not
 // definning own method
 
