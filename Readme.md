@@ -77,3 +77,7 @@
 # in logedinUser we are learning how to send cookies
 
 # now we are moving towards the new functionality which is subcription
+
+# updation of file ==>> in this during routing we have to add multer and has to see wheater the user is logedin or not
+
+# at 2:36 we are studying the aggeregation pipeline A series on English channel must study

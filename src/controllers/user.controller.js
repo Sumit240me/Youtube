@@ -252,9 +252,269 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     }
 })
 
+const changeCurrentPassword = asyncHandler(async(req,res) => {
+    // newPassword and confirm new Password tho check kro ki dono same hai ki nahi agar nahi hai tho error throw kar do
+    const {oldPassword, newPassword} = req.body
+
+    // middleware se req.user se password le lo jo database mai store hai
+
+    const user = await User.findById(req.user?._id)
+    const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
+
+    if(!isPasswordCorrect){
+        throw new ApiError(400, "Invalid old password")
+    }
+        user.password = password
+        await user.save({validateBeforeSave:false})
+
+        return res
+        .status(200)
+        .json( new ApiResponse(200, {}, "password changed successfully"))
+    
+})
+
+const getCurrentUser = asyncHandler(async(req, res) => {
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200, req.user, "current user fetched successfully"))
+})
+// jo - jo update karana hai lelo or update kara do
+const updateAccountDetails = asyncHandler(async(req, res) => {
+    const { fullName, email } = req.body
+
+    if(!fullName || !email){
+        throw new ApiError(400, "All fileds are required")
+    }
+
+    // new ko true karne par update hone ke baad jo information hai usko return kar deta hai
+    const user = await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set: {
+                fullName,
+                email,
+            }
+        },
+        {new: true}
+    ).select("-password")
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, user,"Account details updated successfully"))
+})
+
+const updateUserAvatar = asyncHandler(async(req,res) => {
+    const avatarLocalPath = req.file?.path
+
+    if(!avatarLocalPath){
+        throw new ApiError(400, "Avatar file is missing")
+    }
+   
+   // Todo -- delete the old avatar image
+
+    const avatar = await uploadOnCloudinary(avatarLocalPath)
+
+    if(!avatar.url){
+        throw new ApiError(400, "Error while uploading the avatar on cloudinary")
+    }
+
+    const user = await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set: {
+                avatar: avatar.url
+            }
+        },
+        {new : true}
+    ).select("-password")
+
+    
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200, {user}, "Avatar updated successfully"))
+
+})
+
+const updateUserCoverImage = asyncHandler(async(req,res) => {
+    const coverImageLocalPath = req.file?.path
+
+    if(!coverImageLocalPath){
+        throw new ApiError(400, "coverImage file is missing")
+    }
+
+    const coverImage = await uploadOnCloudinary(coverImageLocalPath)
+
+    if(!coverImage.url){
+        throw new ApiError(400, "Error while uploading the coverImage on cloudinary")
+    }
+
+    const user = await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set: {
+                coverImage: coverImage.url
+            }
+        },
+        {new : true}
+    ).select("-password")
+
+    
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200, {user}, "coverImage updated successfully"))
+
+})
+
+// username jispe app visit kar rahe ho bo kaha atta hai bo params mai atta hai
+const getUserChannelProfile = asyncHandler(async(req,res) => {
+   const {username} = req.params
+
+   if(!username?.trim()){
+        throw new ApiError(400, "Username is missing")
+   }
+   // User.find({username}) app esse bhi kar sakte ho or pir or phir baad mai return karba do
+   // match karaoo konsi value ko match karana hai
+   // 1st lookup to find the number of subscriber and the 2nd one is to find to whom we have subscribed
+   const channel = await User.aggregate([
+    {
+        $match: {
+            username: username?.toLowerCase()
+        }
+    },
+    {
+        $lookup : {
+            from: "subscriptions",
+            localField: "_id",
+            foreignField: "channel",
+            as: "subscribers"
+        }
+    },
+    {
+        $lookup : {
+            from: "subscriptions",
+            localField: "_id",
+            foreignField: "subscriber",
+            as: "subscribedTo"
+        }
+    },// added two more fields to the user field jiskohum dekh rahe hai
+    {
+        $addFields: {
+            subscribersCount: {
+                $size: "$subscribers"
+            },
+            channelsSubscribedToCount: {
+                $size: "$subscribedTo"
+            },
+            isSubscribed: {
+                $cond: {
+                    if: {$in: [req.user?._id, "$subscribers.subscriber"]},
+                    then: true,
+                    else: false
+                }
+            }
+        }
+    },
+    {
+        // project help karta hai jo-jo cheeze bhejni hai bas bahi bhejo
+        $project: {
+             fullName: 1,
+             username: 1,
+             subscribersCount: 1,
+             channelsSubscribedToCount: 1,
+             isSubscribed: 1,
+             avatar: 1,
+             coverImage: 1,
+             email: 1
+        }
+    }
+   ])
+
+   // console.log(channel) // check out what datatype pieline return 
+
+   if(!channel?.length){
+    throw new ApiError(404, "channel does not exists")
+   }   
+  
+   return res
+   .status(200)
+   .json(
+    new ApiResponse(200, channel[0], "User channel fetched succesfully")
+   )
+
+})
+
+
+// we are going for nested lookup
+
+const getWatchHistory = asyncHandler(async(req,res) => {
+   // req.user._id yaha par string milti hai or jaise hi hum mongoose ka use karte hai bo usko mongodbId mai convert kar deta hai
+   // aggregation pipeline ka code directly hi jata hai
+   const user = await User.aggregate([
+    {
+        $match: {
+            _id: new mongoose.Types.ObjectId(req.user._id)
+        }
+    },
+    {
+       $lookup: {
+            from: "videos",
+            localField: "watchHistory",
+            foreignField: "_id",
+            as: "watchHistory",  // taki humne owner ki bhi puri information mil sake isliye ek or pipeline lagani padi
+            pipeline:[
+                {
+                    $lookup: {
+                        from: "users",
+                        localField: "owner",
+                        foreignField:"_id",
+                        as: "owner",
+                        pipeline: [
+                            {
+                                $project: {
+                                    fullName: 1,
+                                    username: 1,
+                                    avatar: 1
+                                }
+                            }
+                        ]
+                    }
+                },  // in order to give the data in well arranged manner we are creating one more pipeline
+                {
+                   $addFields: {
+                       owner: {
+                          $first: "$owner" // yaha par purane owner ki jagah new owner ko replace kar rahe hai
+                       }
+                   }
+                }
+            ]
+       } 
+    }
+   ]) 
+
+   return res
+   .status(200)
+   .json(
+    new ApiResponse(
+        200,
+        user[0].watchHistory,
+        "watch history fetched successfully"
+    )
+   )
+})
+
 export { 
     registerUser,
     loginUser,
     logoutUser,
-    refreshAccessToken
+    refreshAccessToken,
+    changeCurrentPassword,
+    getCurrentUser,
+    updateAccountDetails,
+    updateUserAvatar,
+    updateUserCoverImage,
+    getUserChannelProfile,
+    getWatchHistory
  }
