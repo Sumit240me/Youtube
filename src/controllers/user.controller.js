@@ -179,15 +179,15 @@ const logoutUser = asyncHandler(async(req,res) => {
 await User.findByIdAndUpdate(
     req.user._id,
     {
-        $set: {
-            refreshToken: undefined
+        $unset: {
+            refreshToken: 1  // This removes the field from document
         }
     },
     {
         new: true
     }
     )
-
+   // new humko update object return karta hai
     // ab user ke yaha se Tokens ko remove aur karna hai
     
     const options = {

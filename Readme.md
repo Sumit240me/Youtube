@@ -15,9 +15,9 @@
 # step 2 Data-base connection
 # install .env mongoose express
 
-# database ko hamesa try catch mai warp kro kyuki problems aa akti hai
+# database ko hamesa try catch mai warp kro kyuki problems aa sakti hai
 
-# important line "database hamesa dusare continent mai hai" tho async await kai use karo
+# important line "database hamesa dusare continent mai hai" tho async await ka use karo
 
 # step 3  working in app.js on express 
 

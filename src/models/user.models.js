@@ -26,7 +26,7 @@ const userSchema = new Schema(
         index: true
        }, 
         avatar: {
-            type: String, // cloudinary url jo ki inmages, videos, ko store karke unkaurl dedata hai
+            type: String, // cloudinary url jo ki images, videos, ko store karke unka url dedata hai
             required: true,
         },
         coverImage: {
@@ -63,7 +63,7 @@ userSchema.methods.isPasswordCorrect = async function(password){
 }
 
 // Both are the jwt token only the difference is the usage
-// here we are creating the tokens using jwt.sign(_,_,_)
+// here we are creating the tokens using jwt.sign(_,_,_)   // jwt.sign requires three type of input (1) the values from which your are trying to create token (2)The secret values which are required for creating the token (3)the expirary time
 userSchema.methods.generateAccessToken = function(){
     return jwt.sign(
         {

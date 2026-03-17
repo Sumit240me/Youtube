@@ -6,7 +6,7 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 const router = Router()
 
 // in the uploadField (it is a middleware) we are dealing with the upload options for uploading the images and videos
-// upload provides us the various option like single , array, but we have selected the filed one which accepts the array as the input
+// upload provides us the various option like single , array, but we have selected the feilds one which accepts the array as the input
 router.route("/register").post(
     upload.fields([
         {
