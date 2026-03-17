@@ -131,9 +131,9 @@ const updateVideo = asyncHandler(async(req,res) => {
         throw new ApiError(500, "user not found");
     }
 
-    if(video.owner !== user._id){
-        throw new ApiError(403, "You donot have the permission to update the video")
-    }
+    if (!video.owner.equals(user._id)) {
+    throw new ApiError(403, "You do not have permission to update this video");
+}
 
     const thumbnailLocalPath = req.files?.thumbnail[0].path;   
 
